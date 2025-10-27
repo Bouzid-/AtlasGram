@@ -1,6 +1,6 @@
 //
 //  Created by Amine Bouzid on 27/10/2025.
-//  Copyright (c) 2025 Bleacher Report. All rights reserved.
+//  Copyright (c) 2025 Atlas Instagram. All rights reserved.
 //
 
 import XCTest
