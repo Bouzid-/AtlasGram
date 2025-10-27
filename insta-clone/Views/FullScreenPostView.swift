@@ -6,14 +6,14 @@
 import SwiftUI
 
 struct FullScreenPostView: View {
-    let posts: [Post]
+    @Binding var posts: [Post]
     let initialIndex: Int
     let animationNamespace: Namespace.ID
     @Environment(\.presentationMode) var presentationMode
     @State private var currentIndex: Int
     
-    init(posts: [Post], initialIndex: Int, animationNamespace: Namespace.ID) {
-        self.posts = posts
+    init(posts: Binding<[Post]>, initialIndex: Int, animationNamespace: Namespace.ID) {
+        self._posts = posts
         self.initialIndex = initialIndex
         self.animationNamespace = animationNamespace
         self._currentIndex = State(initialValue: initialIndex)
@@ -24,7 +24,7 @@ struct FullScreenPostView: View {
             VStack(spacing: 0) {
                 ForEach(Array(posts.enumerated()), id: \.element.id) { index, post in
                     SingleFullScreenPostView(
-                        post: post,
+                        post: $posts[index],
                         animationNamespace: animationNamespace
                     )
                     .frame(width: geometry.size.width, height: geometry.size.height)
@@ -67,12 +67,11 @@ struct FullScreenPostView: View {
     
     // MARK: - Single Post View
     struct SingleFullScreenPostView: View {
-        let post: Post
+        @Binding var post: Post
         let animationNamespace: Namespace.ID
         @Environment(\.presentationMode) var presentationMode
-        @State private var isLiked = false
-        @State private var isSaved = false
         @State private var showComments = false
+        @State private var showHeartAnimation = false
         
         var body: some View {
             GeometryReader { geometry in
@@ -82,6 +81,19 @@ struct FullScreenPostView: View {
                         .aspectRatio(contentMode: .fill)
                         .ignoresSafeArea(.all)
                         .matchedGeometryEffect(id: post.id, in: animationNamespace)
+                        .onTapGesture(count: 2) {
+                            toggleLike()
+                        }
+                    
+                    // Heart animation overlay
+                    if showHeartAnimation {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 80))
+                            .foregroundColor(.white)
+                            .scaleEffect(showHeartAnimation ? 1.3 : 0.5)
+                            .opacity(showHeartAnimation ? 0 : 1)
+                            .animation(.easeOut(duration: 0.6), value: showHeartAnimation)
+                    }
                     
                     // Top navigation bar overlay
                     VStack {
@@ -135,10 +147,10 @@ struct FullScreenPostView: View {
                                 // Action buttons
                                 HStack(spacing: 20) {
                                     Button(action: {
-                                        isLiked.toggle()
+                                        toggleLike()
                                     }) {
-                                        Image(systemName: isLiked ? "heart.fill" : "heart")
-                                            .foregroundColor(isLiked ? .red : .white)
+                                        Image(systemName: post.hasLiked ? "heart.fill" : "heart")
+                                            .foregroundColor(post.hasLiked ? .red : .white)
                                             .font(.title2)
                                     }
                                     
@@ -161,9 +173,16 @@ struct FullScreenPostView: View {
                                     Spacer()
                                     
                                     Button(action: {
-                                        isSaved.toggle()
+                                        post.hasBookmarked.toggle()
+                                        
+                                        // Persist the bookmark state
+                                        if post.hasBookmarked {
+                                            PersistenceManager.shared.addBookmarkedPost(post.id)
+                                        } else {
+                                            PersistenceManager.shared.removeBookmarkedPost(post.id)
+                                        }
                                     }) {
-                                        Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                                        Image(systemName: post.hasBookmarked ? "bookmark.fill" : "bookmark")
                                             .foregroundColor(.white)
                                             .font(.title2)
                                     }
@@ -249,6 +268,32 @@ struct FullScreenPostView: View {
                 CommentsView(post: post)
             }
         }
+        
+        private func toggleLike() {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                post.hasLiked.toggle()
+            }
+            
+            // Persist the like state
+            if post.hasLiked {
+                PersistenceManager.shared.addLikedPost(post.id)
+            } else {
+                PersistenceManager.shared.removeLikedPost(post.id)
+            }
+            
+            // Show heart animation
+            if post.hasLiked {
+                showHeartAnimation = false
+                withAnimation(.easeOut(duration: 0.6)) {
+                    showHeartAnimation = true
+                }
+                
+                // Hide animation after completion
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    showHeartAnimation = false
+                }
+            }
+        }
     }
     
     // MARK: - Comments View
@@ -330,6 +375,6 @@ struct FullScreenPostView: View {
         @Namespace static var namespace
         
         static var previews: some View {
-            FullScreenPostView(posts: LocalPostProvider.generatePosts(count: 5), initialIndex: 0, animationNamespace: namespace)
+            FullScreenPostView(posts: .constant(LocalPostProvider.generatePosts(count: 5)), initialIndex: 0, animationNamespace: namespace)
         }
     }

@@ -53,6 +53,10 @@ class DataProvider: ObservableObject {
             self.stories = loadedStories
             self.posts = loadedPosts
             
+            // Apply persisted states
+            PersistenceManager.shared.updateStoryStates(for: &self.stories)
+            PersistenceManager.shared.updatePostStates(for: &self.posts)
+            
             print("✅ Successfully loaded \(stories.count) stories and \(posts.count) posts from Unsplash API")
             
         } catch {
@@ -117,13 +121,16 @@ class DataProvider: ObservableObject {
         
         return unsplashPhotos.enumerated().map { index, photo in
             Post(
+                id: String(photo.id),
                 user: User(
                     userName: photo.user.username,
                     userImage: photo.user.profileImage.small
                 ),
                 postImage: photo.urls.regular,
                 caption: inspirationalCaptions[index % inspirationalCaptions.count],
-                likes: "\(photo.likes) likes"
+                likes: "\(photo.likes) likes",
+                hasLiked: false,
+                hasBookmarked: false
             )
         }
     }
@@ -132,6 +139,11 @@ class DataProvider: ObservableObject {
         // Use static local fallback data when API is unavailable
         stories = LocalFallbackData.stories
         posts = LocalFallbackData.posts
+        
+        // Apply persisted states
+        PersistenceManager.shared.updateStoryStates(for: &stories)
+        PersistenceManager.shared.updatePostStates(for: &posts)
+        
         print("📱 Using local fallback data")
     }
     
@@ -159,7 +171,11 @@ class DataProvider: ObservableObject {
         try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second delay
         
         // Generate more posts using LocalPostProvider
-        let newPosts = LocalPostProvider.generatePosts(count: postsPerPage)
+        var newPosts = LocalPostProvider.generatePosts(count: postsPerPage)
+        
+        // Apply persisted like/bookmark states to new posts
+        PersistenceManager.shared.updatePostStates(for: &newPosts)
+        
         posts.append(contentsOf: newPosts)
         
         // Stop pagination after 5 pages (50 posts total) for local data
@@ -206,6 +222,7 @@ class DataProvider: ObservableObject {
             
             let newPosts = unsplashPhotos.enumerated().map { index, photo in
                 Post(
+                    id: String(photo.id),
                     user: User(
                         userName: photo.user.username,
                         userImage: photo.user.profileImage.small
@@ -216,7 +233,11 @@ class DataProvider: ObservableObject {
                 )
             }
             
-            posts.append(contentsOf: newPosts)
+            // Apply persisted like/bookmark states to new posts
+            var postsWithStates = newPosts
+            PersistenceManager.shared.updatePostStates(for: &postsWithStates)
+            
+            posts.append(contentsOf: postsWithStates)
             
             // Stop pagination after 10 pages (100 posts total) for API data
             if currentPage >= 10 {
@@ -263,5 +284,18 @@ class DataProvider: ObservableObject {
         useLocalData.toggle()
         let mode = useLocalData ? "Local" : "API"
         print("🔄 Switched to \(mode) mode")
+    }
+    
+    // MARK: - Story Actions
+    
+    func markStoryAsSeen(_ story: Story) {
+        // Update local state
+        if let storyIndex = stories.firstIndex(where: { $0.id == story.id }) {
+            stories[storyIndex].hasSeen = true
+        }
+        
+        // Persist the change
+        PersistenceManager.shared.addSeenStory(story.id.uuidString)
+        print("👁️ Marked story as seen: \(story.user.userName)")
     }
 }

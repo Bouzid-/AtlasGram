@@ -35,6 +35,7 @@ struct LocalPostProvider {
     static func generatePosts(count: Int = 8) -> [Post] {
         return (0..<count).map { index in
             Post(
+                id: "post_\(index + 1)",
                 user: LocalUserProvider.randomUser(),
                 postImage: "post_\(index + 1)",
                 caption: inspirationalCaptions[index % inspirationalCaptions.count],
@@ -45,6 +46,7 @@ struct LocalPostProvider {
     
     static func generatePost(index: Int) -> Post {
         return Post(
+            id: "post_\(index + 1)",
             user: LocalUserProvider.randomUser(),
             postImage: "post_\(index)",
             caption: inspirationalCaptions[(index - 1) % inspirationalCaptions.count],
@@ -62,6 +64,7 @@ struct LocalPostProvider {
         ]
         
         return Post(
+            id: "post_ran_\(Int.random(in: 1...19))",
             user: LocalUserProvider.randomTravelUser(),
             postImage: "post_\(Int.random(in: 1...19))",
             caption: travelCaptions.randomElement() ?? travelCaptions[0],
@@ -78,6 +81,7 @@ struct LocalPostProvider {
         ]
         
         return Post(
+            id: "post_ran_\(Int.random(in: 1...19))",
             user: LocalUserProvider.randomCreativeUser(),
             postImage: "post_\(Int.random(in: 1...19))",
             caption: creativeCaptions.randomElement() ?? creativeCaptions[0],
@@ -94,6 +98,7 @@ struct LocalPostProvider {
         ]
         
         return Post(
+            id: "post_ran_\(Int.random(in: 1...19))",
             user: LocalUserProvider.randomLifestyleUser(),
             postImage: "post_\(Int.random(in: 1...19))",
             caption: lifestyleCaptions.randomElement() ?? lifestyleCaptions[0],

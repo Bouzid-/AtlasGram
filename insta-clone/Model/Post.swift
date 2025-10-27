@@ -6,11 +6,11 @@
 import Foundation
 
 struct Post: Identifiable {
-    let id = UUID()
+    let id: String
     let user: User
     let postImage: String
     let caption: String
     let likes: String
-    let hasLiked: Bool = false
-    let hasBookmarked: Bool = false
+    var hasLiked: Bool = false
+    var hasBookmarked: Bool = false
 }

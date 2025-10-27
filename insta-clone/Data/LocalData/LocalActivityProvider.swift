@@ -75,6 +75,7 @@ struct LocalActivityProvider {
             duration: durations.randomElement() ?? durations[0],
             usersInContext: usersInContext,
             post: Post(
+                id: "post_\(Int.random(in: 1...19))",
                 user: mainUser,
                 postImage: "post_\(Int.random(in: 1...19))",
                 caption: sampleCaptions.randomElement() ?? sampleCaptions[0],
@@ -93,6 +94,7 @@ struct LocalActivityProvider {
             duration: durations.randomElement() ?? "15m",
             usersInContext: LocalUserProvider.randomUsers(count: Int.random(in: 1...3)),
             post: Post(
+                id: "post_\(Int.random(in: 1...19))",
                 user: mainUser,
                 postImage: "post_\(Int.random(in: 1...19))",
                 caption: sampleCaptions.randomElement() ?? sampleCaptions[0],
@@ -109,6 +111,7 @@ struct LocalActivityProvider {
             duration: durations.randomElement() ?? "2h",
             usersInContext: [LocalUserProvider.randomUser()],
             post: Post(
+                id: "post_\(Int.random(in: 1...19))",
                 user: mainUser,
                 postImage: "post_\(Int.random(in: 1...19))",
                 caption: sampleCaptions.randomElement() ?? sampleCaptions[0],
@@ -126,6 +129,7 @@ struct LocalActivityProvider {
             duration: durations.randomElement() ?? "1h",
             usersInContext: [LocalUserProvider.randomUser()],
             post: Post(
+                id: "post_\(Int.random(in: 1...19))",
                 user: mainUser,
                 postImage: "post_\(Int.random(in: 1...19))",
                 caption: sampleCaptions.randomElement() ?? sampleCaptions[0],

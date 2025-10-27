@@ -21,16 +21,18 @@ struct TimeLineContainerView: View {
                         // Stories Section
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
-                                ForEach(dataProvider.stories) {
-                                    StoryView(story: $0)
+                                ForEach(dataProvider.stories) { story in
+                                    StoryView(story: story) { tappedStory in
+                                        dataProvider.markStoryAsSeen(tappedStory)
+                                    }
                                 }
                             }
                         }
                         
                         // Posts Section
                         ForEach(Array(dataProvider.posts.enumerated()), id: \.element.id) { index, post in
-                            NavigationLink(destination: FullScreenPostView(posts: dataProvider.posts, initialIndex: index, animationNamespace: animationNamespace)) {
-                                PostView(post: post, screenWidth: UIScreen.main.bounds.size.width)
+                            NavigationLink(destination: FullScreenPostView(posts: $dataProvider.posts, initialIndex: index, animationNamespace: animationNamespace)) {
+                                PostView(post: $dataProvider.posts[index], screenWidth: UIScreen.main.bounds.size.width)
                                     .matchedGeometryEffect(id: post.id, in: animationNamespace)
                             }
                             .buttonStyle(PlainButtonStyle())

@@ -20,7 +20,7 @@ struct ProfileHeader: View {
             Spacer()
             
             VStack {
-                Text("205")
+                Text("999")
                     .font(Font.system(size: 16, weight: .bold))
                 Text("Posts")
                     .font(Font.system(size: 14, weight: .medium))
@@ -28,7 +28,7 @@ struct ProfileHeader: View {
             Spacer()
 
             VStack {
-                Text("364")
+                Text("434")
                     .font(Font.system(size: 16, weight: .bold))
                 Text("Followers")
                     .font(Font.system(size: 14, weight: .medium))
@@ -36,7 +36,7 @@ struct ProfileHeader: View {
             Spacer()
 
             VStack {
-                Text("358")
+                Text("888")
                     .font(Font.system(size: 16, weight: .bold))
                 Text("Following")
                     .font(Font.system(size: 14, weight: .medium))
